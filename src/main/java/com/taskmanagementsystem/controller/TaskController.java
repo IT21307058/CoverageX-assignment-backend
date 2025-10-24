@@ -25,7 +25,7 @@ public class TaskController {
     }
 
     @GetMapping
-    public Page<TaskDTO> getAllTasks(@RequestParam(defaultValue = "0") int page,
+    public Page<TaskDTO> getAllTasks(@RequestParam(defaultValue = "5") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return taskService.getAllTasks(pageable);

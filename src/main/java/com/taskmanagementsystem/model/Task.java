@@ -1,5 +1,9 @@
 package com.taskmanagementsystem.model;
 
+import java.util.Date;
+
+import org.springframework.data.annotation.CreatedDate;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -23,8 +27,12 @@ public class Task {
     @NotBlank(message = "Description is mandatory")
     private String description;
 
-    @Enumerated(EnumType.STRING) 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status = TaskStatus.NOT_DONE;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Date createdDate = new Date();
 
 }

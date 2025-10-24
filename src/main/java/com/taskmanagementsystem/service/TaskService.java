@@ -7,7 +7,9 @@ import com.taskmanagementsystem.model.Task;
 import com.taskmanagementsystem.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,7 +29,9 @@ public class TaskService implements TaskServiceInterface {
     }
 
     public Page<TaskDTO> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable)
+        Pageable sortedByDate = PageRequest.of(pageable.getPageNumber(), 5, Sort.by(Sort.Order.desc("createdDate")));
+
+        return taskRepository.findAll(sortedByDate)
                 .map(task -> taskMapper.mapToDTO(task));
     }
 
