@@ -4,6 +4,7 @@ import com.taskmanagementsystem.dto.TaskDTO;
 import com.taskmanagementsystem.exception.TaskNotFoundException;
 import com.taskmanagementsystem.mapper.TaskMapper;
 import com.taskmanagementsystem.model.Task;
+import com.taskmanagementsystem.model.TaskStatus;
 import com.taskmanagementsystem.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,7 +32,7 @@ public class TaskService implements TaskServiceInterface {
     public Page<TaskDTO> getAllTasks(Pageable pageable) {
         Pageable sortedByDate = PageRequest.of(pageable.getPageNumber(), 5, Sort.by(Sort.Order.desc("createdDate")));
 
-        return taskRepository.findAll(sortedByDate)
+        return taskRepository.findByStatusNot(TaskStatus.DONE, sortedByDate)
                 .map(task -> taskMapper.mapToDTO(task));
     }
 
@@ -59,6 +60,14 @@ public class TaskService implements TaskServiceInterface {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         taskRepository.delete(task);
+    }
+
+    public TaskDTO markTaskAsCompleted(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+        task.setStatus(TaskStatus.DONE); 
+        taskRepository.save(task);
+        return taskMapper.mapToDTO(task); 
     }
 
 }

@@ -1,6 +1,7 @@
 package com.taskmanagementsystem;
 
 import com.taskmanagementsystem.dto.TaskDTO;
+import com.taskmanagementsystem.mapper.TaskMapper;
 import com.taskmanagementsystem.model.Task;
 import com.taskmanagementsystem.model.TaskStatus;
 import com.taskmanagementsystem.repository.TaskRepository;
@@ -30,6 +31,9 @@ class TaskmanagementsystemApplicationTests {
 	@Mock
 	private TaskRepository taskRepository;
 
+	@Mock
+	private TaskMapper taskMapper;
+
 	@InjectMocks
 	private TaskService taskService;
 
@@ -55,7 +59,10 @@ class TaskmanagementsystemApplicationTests {
 
 	@Test
 	void createTask_ShouldReturnSavedDTO() {
+		// Mock behavior of taskMapper
+		when(taskMapper.toEntity(any(TaskDTO.class))).thenReturn(task);
 		when(taskRepository.save(any(Task.class))).thenReturn(task);
+		when(taskMapper.mapToDTO(any(Task.class))).thenReturn(dto);
 
 		TaskDTO result = taskService.createTask(dto);
 
@@ -64,28 +71,15 @@ class TaskmanagementsystemApplicationTests {
 		assertEquals(dto.getDescription(), result.getDescription());
 		assertEquals(TaskStatus.NOT_DONE, result.getStatus());
 		verify(taskRepository, times(1)).save(any(Task.class));
+		verify(taskMapper, times(1)).toEntity(any(TaskDTO.class));
+		verify(taskMapper, times(1)).mapToDTO(any(Task.class));
 	}
 
-	// ✅ Get All Tasks
-	// @Test
-	// void getAllTasks_ShouldReturnPagedDTOs() {
-	// 	List<Task> tasks = Arrays.asList(task);
-	// 	Page<Task> page = new PageImpl<>(tasks);
-	// 	Pageable pageable = PageRequest.of(0, 10);
-
-	// 	when(taskRepository.findAll(pageable)).thenReturn(page);
-
-	// 	Page<TaskDTO> result = taskService.getAllTasks(pageable);
-
-	// 	assertEquals(1, result.getContent().size());
-	// 	assertEquals(task.getTitle(), result.getContent().get(0).getTitle());
-	// 	verify(taskRepository, times(1)).findAll(pageable);
-	// }
-
-	// ✅ Get Task by ID
 	@Test
 	void getTaskById_ShouldReturnTaskDTO_WhenFound() {
+		// Mock behavior of taskRepository and taskMapper
 		when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+		when(taskMapper.mapToDTO(any(Task.class))).thenReturn(dto);
 
 		TaskDTO result = taskService.getTaskById(1L);
 
@@ -93,13 +87,15 @@ class TaskmanagementsystemApplicationTests {
 		assertEquals(task.getId(), result.getId());
 		assertEquals(task.getTitle(), result.getTitle());
 		verify(taskRepository, times(1)).findById(1L);
+		verify(taskMapper, times(1)).mapToDTO(any(Task.class));
 	}
 
-	// ✅ Update Task
 	@Test
 	void updateTask_ShouldReturnUpdatedTaskDTO() {
+		// Mock behavior of taskRepository and taskMapper
 		when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
 		when(taskRepository.save(any(Task.class))).thenReturn(task);
+		when(taskMapper.mapToDTO(any(Task.class))).thenReturn(dto);
 
 		dto.setDescription("Updated Description");
 		dto.setStatus(TaskStatus.DONE);
@@ -110,11 +106,12 @@ class TaskmanagementsystemApplicationTests {
 		assertEquals("Updated Description", result.getDescription());
 		assertEquals(TaskStatus.DONE, result.getStatus());
 		verify(taskRepository, times(1)).save(any(Task.class));
+		verify(taskMapper, times(1)).mapToDTO(any(Task.class));
 	}
 
-	// ✅ Delete Task
 	@Test
 	void deleteTask_ShouldCallRepositoryDelete() {
+		// Mock behavior of taskRepository
 		when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
 
 		taskService.deleteTask(1L);
